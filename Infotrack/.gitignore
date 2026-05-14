@@ -1,0 +1,29 @@
+## Visual Studio / MSBuild
+.vs/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build outputs
+**/bin/
+**/obj/
+**/Debug/
+**/Release/
+[Ll]og/
+[Ll]ogs/
+
+## NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+## Node / Angular (client)
+infotrack.client/node_modules/
+infotrack.client/dist/
+infotrack.client/.angular/cache/
+
+## OS
+.DS_Store
+Thumbs.db
