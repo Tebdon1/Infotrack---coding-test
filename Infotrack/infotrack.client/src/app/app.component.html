@@ -1,6 +1,4 @@
-﻿<h1 id="tableLabel">Weather forecast</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
+﻿<h1 id="tableLabel">Solicitor Search</h1>
 
 <p *ngIf="!solicitors"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
 
@@ -20,7 +18,8 @@
             <th>Name</th>
             <th>Address</th>
             <th>Telephone</th>
-            <th>Description</th>
+            <th>Location</th>
+            <th>Star Rating</th>
         </tr>
     </thead>
     <tbody>
@@ -28,7 +27,8 @@
             <td>{{ solicitor.name }}</td>
             <td>{{ solicitor.address }}</td>
             <td>{{ solicitor.telephone }}</td>
-            <td>{{ solicitor.description }}</td>
+            <td>{{ solicitor.location }}</td>
+            <td>{{ solicitor.starRating }}</td>
         </tr>
     </tbody>
 </table>

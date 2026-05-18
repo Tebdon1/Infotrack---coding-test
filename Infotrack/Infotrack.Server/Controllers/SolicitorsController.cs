@@ -17,17 +17,20 @@ namespace Infotrack.Server.Controllers
         [HttpGet("GetSolicitors")]
         public async Task<IEnumerable<Solicitors>> GetSolicitors([FromQuery] string[] locations)
         {
-            Solicitors[] solicitors = [];
+            var solicitors = new List<Solicitors>();
 
             foreach (string location in locations)
             {
-                await ScrapeWebsite($"https://www.solicitors.com/conveyancing+{location.Trim().ToLower()}.html", solicitors);
+                await ScrapeWebsite(
+                    $"https://www.solicitors.com/conveyancing+{location.Trim().ToLower()}.html",
+                    solicitors,
+                    location);
             }
 
             return solicitors;
         }
 
-        public async Task ScrapeWebsite(string url, Solicitors[] solicitors)
+        public async Task ScrapeWebsite(string url, List<Solicitors> solicitors, string location)
         {
             using var httpClient = new HttpClient();
             // Many sites return an empty shell, challenge page, or tiny payload to default .NET / bot-like clients.
@@ -52,17 +55,42 @@ namespace Infotrack.Server.Controllers
             foreach (var node in resultItems)
             {
                 var name = ExtractFirmName(node);
-                var address = node.SelectSingleNode(".//a[contains(concat(' ', normalize-space(@class), ' '), ' link-map ')]//address")
-                    ?.InnerText.Trim();
-                var telNode = node.SelectSingleNode(".//a[contains(concat(' ', normalize-space(@class), ' '), ' tel ')]");
-                var telephone = telNode?.InnerText.Trim()
-                    ?? telNode?.GetAttributeValue("href", null)?.Replace("tel:", "", StringComparison.OrdinalIgnoreCase).Trim();
-                var description = node.SelectSingleNode(".//p")?.InnerText.Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    continue;
+                }
 
-                _logger.LogInformation(
-                    "Solicitor: {Name} | {Address} | {Telephone} | {Description}",
-                    name, address, telephone, description);
+                solicitors.Add(new Solicitors
+                {
+                    Name = name,
+                    Address = node.SelectSingleNode(".//a[contains(concat(' ', normalize-space(@class), ' '), ' link-map ')]//address")
+                        ?.InnerText.Trim(),
+                    Telephone = ExtractTelephone(node),
+                    Location = location,
+                    StarRating = ExtractStarRating(node),
+                });
             }
+        }
+
+        private static string? ExtractTelephone(HtmlNode item)
+        {
+            var telLink = item.SelectSingleNode(
+                    ".//div[contains(concat(' ', normalize-space(@class), ' '), ' phone-block ')]//a[starts-with(@href, 'tel:')]")
+                ?? item.SelectSingleNode(".//a[starts-with(@href, 'tel:')]")
+                ?? item.SelectSingleNode(".//a[contains(concat(' ', normalize-space(@class), ' '), ' tel ')]");
+
+            if (telLink == null)
+            {
+                return null;
+            }
+
+            var href = telLink.GetAttributeValue("href", null);
+            if (!string.IsNullOrWhiteSpace(href) && href.StartsWith("tel:", StringComparison.OrdinalIgnoreCase))
+            {
+                return href["tel:".Length..].Trim();
+            }
+
+            return HtmlEntity.DeEntitize(telLink.InnerText).Trim();
         }
 
         // First direct text under span.h2 is the firm name; InnerText would include star ratings.
@@ -88,6 +116,26 @@ namespace Infotrack.Server.Controllers
             }
 
             return HtmlEntity.DeEntitize(h2Span.InnerText).Trim();
+        }
+
+        private static decimal? ExtractStarRating(HtmlNode item)
+        {
+            var revResults = item.SelectSingleNode(
+                ".//span[contains(concat(' ', normalize-space(@class), ' '), ' rev-results ')]");
+            if (revResults == null)
+            {
+                return null;
+            }
+            var fullStars = revResults.SelectNodes(
+                ".//div[contains(concat(' ', normalize-space(@class), ' '), ' star-full ')]")?.Count ?? 0;
+            var halfStars = revResults.SelectNodes(
+                ".//div[contains(concat(' ', normalize-space(@class), ' '), ' star-half ')]")?.Count ?? 0;
+            
+            if (fullStars == 0 && halfStars == 0)
+            {
+                return null;
+            }
+            return fullStars + (halfStars * 0.5m);
         }
     }
 }

@@ -4,9 +4,10 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 
 interface Solicitor {
   name: string;
-  address: number;
-  telephone: number;
-  description: string;
+  address: string;
+  telephone: string;
+  location: string;
+  starRating: number;
 }
 
 @Component({
@@ -39,7 +40,6 @@ export class AppComponent implements OnInit {
 
   onSearch() {
     const locations = this.searchForm.get('locations')?.value; // string[]
-    console.log(locations);
     this.getSolicitors(locations);
   }
 
@@ -48,7 +48,6 @@ export class AppComponent implements OnInit {
     for (const location of locations) {
       params = params.append('locations', location);
     }
-    console.log(params);
     this.http.get<Solicitor[]>('https://localhost:7047/solicitors/getSolicitors', { params: params }).subscribe(
       (result) => {
         this.solicitors = result;
