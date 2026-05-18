@@ -9,6 +9,7 @@
 ## Build outputs
 **/bin/
 **/obj/
+Infotrack.Server/wwwroot/
 **/Debug/
 **/Release/
 [Ll]og/

@@ -1,14 +1,35 @@
-﻿:host {
-    max-width: 1280px;
-    padding: 2rem;
-    text-align: center;
+:host {
+  display: block;
 }
 
-th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
+.search-toolbar .location-dropdown-toggle {
+  min-width: 14rem;
+  text-align: left;
 }
 
-table {
-    margin: 0 auto;
+.location-dropdown-menu {
+  min-width: 14rem;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.location-dropdown-item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.location-dropdown-item:active {
+  background-color: transparent;
+  color: inherit;
+}
+
+.results-grid {
+  max-height: 70vh;
+}
+
+.results-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }

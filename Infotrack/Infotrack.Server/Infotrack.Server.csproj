@@ -23,4 +23,14 @@
     </ProjectReference>
   </ItemGroup>
 
+  <Target Name="CopySpaDistToWwwroot" AfterTargets="Build" Condition="Exists('$(SpaRoot)dist\infotrack.client\browser')">
+    <ItemGroup>
+      <SpaDistFiles Include="$(SpaRoot)dist\infotrack.client\browser\**\*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(SpaDistFiles)"
+      DestinationFolder="$(MSBuildProjectDirectory)\wwwroot\%(RecursiveDir)"
+      SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

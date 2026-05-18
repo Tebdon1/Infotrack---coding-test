@@ -45,5 +45,7 @@ describe('AppComponent', () => {
     req.flush(mockSolicitors);
 
     expect(component.solicitors).toEqual(mockSolicitors);
+    expect(component.isLoading).toBeFalse();
+    expect(component.hasSearched).toBeTrue();
   });
 });
